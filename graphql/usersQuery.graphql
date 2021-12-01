@@ -1,0 +1,15 @@
+query FIND_USERS_QUERY {
+  users {
+    id
+    roles {
+      id
+      name
+    }
+    email
+    profile {
+      id
+      firstName
+      lastName
+    }
+  }
+}
