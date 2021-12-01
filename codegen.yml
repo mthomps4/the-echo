@@ -7,7 +7,7 @@ hooks:
 generates:
   types.ts:
     documents:
-      - 'graphql/**/*.graphql'
+      - 'src/graphql/**/*.graphql'
     plugins:
       - typescript
       - typescript-operations
