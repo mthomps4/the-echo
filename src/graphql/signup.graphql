@@ -1,0 +1,19 @@
+mutation SIGNUP_MUTATION($data: SignupInput!) {
+  signup(data: $data) {
+    token
+    user{
+      id
+      email
+      roles{
+        id
+        name
+      }
+      profile{
+        id
+        firstName
+        lastName
+        fullName
+      }
+    }
+  }
+}
