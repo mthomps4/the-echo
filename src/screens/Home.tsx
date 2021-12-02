@@ -3,7 +3,6 @@ import { Box, Center, Text } from 'native-base';
 import { useFindUsersQueryQuery } from '../../types';
 
 export const HomeScreen = () => {
-  const a = 1;
   const { data, error, loading } = useFindUsersQueryQuery();
 
   console.log({ data, error, loading });
@@ -21,7 +20,7 @@ export const HomeScreen = () => {
   return (
     <Box>
       {users.map((user) => (
-        <Text>{user.email}</Text>
+        <Text key={user.id}>{user.email}</Text>
       ))}
     </Box>
   );
