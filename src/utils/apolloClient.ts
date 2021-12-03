@@ -12,8 +12,8 @@ export function createApolloClient() {
     fetch,
   });
 
-  const authLink = setContext((_, { headers }) => {
-    const token = AsyncStorage.getItem(AUTH_TOKEN_KEY);
+  const authLink = setContext(async (_, { headers }) => {
+    const token = await AsyncStorage.getItem(AUTH_TOKEN_KEY);
 
     return {
       headers: {

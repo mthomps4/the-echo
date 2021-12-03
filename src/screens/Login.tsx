@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   Text,
@@ -10,10 +10,38 @@ import {
   Button,
   HStack,
   Pressable,
+  Center,
 } from 'native-base';
+import { AuthPayload, useLoginMutationMutation } from '../../types';
+import AsyncStorage from '@react-native-community/async-storage';
+import { AUTH_TOKEN_KEY, AUTH_USER_KEY } from '../constants';
+import { useAuth } from '../contexts/Auth';
+
 export const LoginScreen = ({ navigation }) => {
-  const a = 1;
-  console.log({ navigation });
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [errors, setErrors] = useState(null);
+  const { handleLoginSuccess } = useAuth();
+
+  const handleLoginError = (e) => {
+    // TODO: Add React Hook Form and Parse GQL Errors
+    console.log(e.graphQLErrors);
+    setErrors(true);
+  };
+
+  const [loginMutation, { loading }] = useLoginMutationMutation({
+    onCompleted: handleLoginSuccess,
+    onError: handleLoginError,
+  });
+
+  const handleSubmit = async () => {
+    await loginMutation({
+      variables: {
+        email,
+        password,
+      },
+    });
+  };
 
   return (
     <Box safeArea p="2" py="8" w="90%" maxW="290" mx="auto">
@@ -42,26 +70,35 @@ export const LoginScreen = ({ navigation }) => {
       <VStack space={3} mt="5">
         <FormControl>
           <FormControl.Label>Email</FormControl.Label>
-          <Input />
+          <Input
+            onChange={(e: any) => setEmail(e.target.value)}
+            value={email}
+            placeholder="spaceman@roadster.com"
+          />
         </FormControl>
         <FormControl>
           <FormControl.Label>Password</FormControl.Label>
-          <Input type="password" />
-          <Link
-            _text={{
-              fontSize: 'xs',
-              fontWeight: '500',
-              color: 'green.500',
-            }}
-            alignSelf="flex-end"
-            mt="1"
-          >
-            Forget Password?
-          </Link>
+          <Input
+            type="password"
+            onChange={(e: any) => setPassword(e.target.value)}
+            value={password}
+            placeholder="redH0tSecretSauce"
+          />
         </FormControl>
-        <Button mt="2" colorScheme="green">
+        <Button
+          mt="2"
+          colorScheme="green"
+          onPress={handleSubmit}
+          isLoading={loading}
+          isLoadingText="Loading..."
+        >
           Sign in
         </Button>
+        {errors && (
+          <Center>
+            <Text color="red.700">She doesn't even go here?!</Text>
+          </Center>
+        )}
         <HStack mt="6" justifyContent="center">
           <Text
             fontSize="sm"
@@ -70,7 +107,7 @@ export const LoginScreen = ({ navigation }) => {
               color: 'warmGray.200',
             }}
           >
-            I'm a new user.{' '}
+            Don't have an account?{' '}
           </Text>
           <Pressable onPress={() => navigation.navigate('Signup')}>
             <Text color="green.500" fontWeight="medium" fontSize="sm">

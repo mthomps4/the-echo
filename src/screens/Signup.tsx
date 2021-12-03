@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   Heading,
@@ -8,10 +8,15 @@ import {
   Button,
   HStack,
   Text,
-  Link,
   Pressable,
 } from 'native-base';
 export const SignupScreen = ({ navigation }) => {
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+
   return (
     <Box safeArea p="2" w="90%" maxW="290" py="8" mx="auto">
       <Heading
