@@ -6,45 +6,38 @@ import {
   VStack,
   FormControl,
   Input,
-  Link,
   Button,
   HStack,
   Pressable,
   Center,
 } from 'native-base';
-import { AuthPayload, useLoginMutationMutation } from '../../types';
-import AsyncStorage from '@react-native-community/async-storage';
-import { AUTH_TOKEN_KEY, AUTH_USER_KEY } from '../constants';
 import { useAuth } from '../contexts/Auth';
+import { ApolloError } from '@apollo/client';
+import { LoadingModal } from '../components/LoadingModal';
 
 export const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState(null);
-  const { handleLoginSuccess } = useAuth();
+  const [loading, setLoading] = useState(false);
+  const { login } = useAuth();
 
-  const handleLoginError = (e) => {
+  const handleLoginError = (e: ApolloError) => {
+    setLoading(false);
     // TODO: Add React Hook Form and Parse GQL Errors
     console.log(e.graphQLErrors);
     setErrors(true);
   };
 
-  const [loginMutation, { loading }] = useLoginMutationMutation({
-    onCompleted: handleLoginSuccess,
-    onError: handleLoginError,
-  });
-
   const handleSubmit = async () => {
-    await loginMutation({
-      variables: {
-        email,
-        password,
-      },
-    });
+    setLoading(true);
+    await login(email, password, handleLoginError);
+    setLoading(false);
   };
 
   return (
     <Box safeArea p="2" py="8" w="90%" maxW="290" mx="auto">
+      <LoadingModal isLoading={loading} />
       <Heading
         size="lg"
         fontWeight="600"
@@ -89,8 +82,8 @@ export const LoginScreen = ({ navigation }) => {
           mt="2"
           colorScheme="green"
           onPress={handleSubmit}
-          isLoading={loading}
-          isLoadingText="Loading..."
+          // isLoading={loading}
+          // isLoadingText="Loading..."
         >
           Sign in
         </Button>
