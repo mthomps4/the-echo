@@ -22,10 +22,10 @@ export const LoginScreen = ({ navigation }) => {
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
 
-  const handleLoginError = (e: ApolloError) => {
+  const handleLoginError = (e) => {
     setLoading(false);
-    // TODO: Add React Hook Form and Parse GQL Errors
-    console.log(e.graphQLErrors);
+    // TODO: Realworld -- use React Hook Form and Parse GQL Errors
+    console.error('BOOM', e);
     setErrors(true);
   };
 
