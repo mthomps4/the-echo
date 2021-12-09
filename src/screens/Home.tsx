@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box, Button, Center, Text } from 'native-base';
 import { useFindUsersQueryQuery } from '../../types';
-import AsyncStorage from '@react-native-community/async-storage';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AUTH_TOKEN_KEY, AUTH_USER_KEY } from '../constants';
 import { useAuth } from '../contexts/Auth';
 

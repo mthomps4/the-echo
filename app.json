@@ -3,6 +3,9 @@
     "name": "echo",
     "slug": "echo",
     "version": "1.0.0",
+    "packagerOpts": {
+      "sourceExts": ["cjs"]
+    },
     "assetBundlePatterns": [
       "**/*"
     ]

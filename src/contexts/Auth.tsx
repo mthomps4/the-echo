@@ -1,4 +1,4 @@
-import AsyncStorage from '@react-native-community/async-storage';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { AUTH_TOKEN_KEY, AUTH_USER_KEY } from '../constants';
 import { useLoginMutationMutation } from '../../types';
