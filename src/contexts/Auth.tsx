@@ -42,6 +42,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     const onError = (e: ApolloError) => {
+      console.log(e);
       errorHandler(e);
     };
 
