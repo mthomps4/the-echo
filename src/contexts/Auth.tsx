@@ -1,5 +1,10 @@
 import * as React from 'react';
-import { MutationLoginArgs, useLoginMutation } from '../../types';
+import {
+  MutationLoginArgs,
+  MutationSignupArgs,
+  useLoginMutation,
+  useSignupMutation,
+} from '../../types';
 import {
   getToken,
   setToken,
@@ -13,8 +18,8 @@ const AuthContext = React.createContext({
   status: 'idle',
   authToken: null,
   currentUser: null,
-  login: (data, errorHandler) => {},
-  signUp: (data) => {},
+  login: (loginData: MutationLoginArgs, errorHandler = (e) => {}) => {},
+  signUp: (signUpData: MutationSignupArgs, errorHandler = (e) => {}) => {},
   signOut: () => {},
 });
 
@@ -56,6 +61,7 @@ const reducer = (state, action) => {
 
 export const AuthProvider = ({ children }) => {
   const [loginMutation] = useLoginMutation();
+  const [signupMutation] = useSignupMutation();
 
   const [state, dispatch] = React.useReducer(reducer, {
     status: 'idle',
@@ -85,18 +91,32 @@ export const AuthProvider = ({ children }) => {
 
   const actions = React.useMemo(
     () => ({
-      signUp: async (data: MutationLoginArgs, errorHandler) => {
+      signUp: async (signUpData: MutationSignupArgs, errorHandler = (e) => {}) => {
         // THIS SHOULD TAKE DATA and hit GQL
+        try {
+          const { data, errors } = await signupMutation({ variables: signUpData });
+          if (errors) {
+            throw errors;
+          }
+
+          const {
+            signup: { user, token },
+          } = data;
+
+          dispatch({ type: 'SIGN_UP', token, user });
+          await setToken(token);
+          await setUser(user);
+        } catch (e) {
+          console.error('SIGNUP_ERROR');
+          console.error(e);
+          errorHandler(e);
+        }
 
         const token = 'dummy_token';
         const user = {
           firstName: 'Jim',
           lastName: 'Bob',
         };
-
-        dispatch({ type: 'SIGN_UP', token, user });
-        await setToken(token);
-        await setUser(user);
       },
       login: async (loginData: MutationLoginArgs, errorHandler = (e) => {}) => {
         // THIS SHOULD TAKE DATA and hit GQL
