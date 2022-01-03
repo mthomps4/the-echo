@@ -1,4 +1,4 @@
-query FIND_USERS_QUERY {
+query FIND_USERS {
   users {
     id
     roles {

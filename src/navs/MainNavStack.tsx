@@ -8,8 +8,8 @@ import { LoadingScreen } from '../screens/Loading';
 
 const MainNav = createNativeStackNavigator();
 export const MainNavStack = () => {
-  const { currentUser, splashScreen } = useAuth();
-  if (splashScreen) return <LoadingScreen />;
+  const { currentUser, status } = useAuth();
+  // if (status === 'idle') return <LoadingScreen />;
 
   // https://reactnavigation.org/docs/auth-flow/
   // Recommended to use ONE Navigator via docs

@@ -1,14 +1,14 @@
-mutation SIGNUP_MUTATION($data: SignupInput!) {
+mutation SIGNUP($data: SignupInput!) {
   signup(data: $data) {
     token
-    user{
+    user {
       id
       email
-      roles{
+      roles {
         id
         name
       }
-      profile{
+      profile {
         id
         firstName
         lastName

@@ -1,63 +1,134 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { AUTH_TOKEN_KEY, AUTH_USER_KEY } from '../constants';
-import { useLoginMutationMutation } from '../../types';
-import { ApolloError } from '@apollo/client';
+import * as React from 'react';
+import { MutationLoginArgs, useLoginMutation } from '../../types';
+import {
+  getToken,
+  setToken,
+  removeToken,
+  removeUser,
+  setUser,
+  getUser,
+} from '../utils/asyncStorage';
 
-const AuthContext = createContext({
+const AuthContext = React.createContext({
+  status: 'idle',
+  authToken: null,
   currentUser: null,
-  splashScreen: false,
-  signout: null,
-  login: null,
+  login: (data, errorHandler) => {},
+  signUp: (data) => {},
+  signOut: () => {},
 });
 
+export const useAuth = () => {
+  const context = React.useContext(AuthContext);
+
+  if (!context) {
+    throw new Error('AuthContext Error');
+  }
+
+  return context;
+};
+
+const reducer = (state, action) => {
+  switch (action.type) {
+    case 'SIGN_OUT':
+      return {
+        ...state,
+        status: 'signOut',
+        authToken: null,
+        currentUser: null,
+      };
+    case 'SIGN_IN':
+      return {
+        ...state,
+        status: 'login',
+        authToken: action.token,
+        currentUser: action.user,
+      };
+    case 'SIGN_UP':
+      return {
+        ...state,
+        status: 'signUp',
+        authToken: action.token,
+        currentUser: action.user,
+      };
+  }
+};
+
 export const AuthProvider = ({ children }) => {
-  const [currentUser, setCurrentUser] = useState(null);
-  const [splashScreen, setSplashScreen] = useState(false);
+  const [loginMutation] = useLoginMutation();
 
-  const [loginMutation] = useLoginMutationMutation();
+  const [state, dispatch] = React.useReducer(reducer, {
+    status: 'idle',
+    authToken: null,
+    currentUser: null,
+  });
 
-  // Validate if a user is still logged in
-  useEffect(() => {
-    const checkForUser = async () => {
-      setSplashScreen(true);
-      const userJson = await AsyncStorage.getItem(AUTH_USER_KEY);
-      const user = userJson ? JSON.parse(userJson) : null;
-      setCurrentUser(user);
-      setSplashScreen(false);
+  React.useEffect(() => {
+    const initState = async () => {
+      try {
+        const authToken = await getToken();
+        const currentUser = await getUser();
+
+        if (authToken !== null && currentUser !== null) {
+          dispatch({ type: 'SIGN_IN', token: authToken, user: currentUser });
+        } else {
+          dispatch({ type: 'SIGN_OUT' });
+        }
+      } catch (e) {
+        console.log(e);
+        dispatch({ type: 'SIGN_OUT' });
+      }
     };
 
-    checkForUser();
+    initState();
   }, []);
 
-  const login = async (email: string, password: string, errorHandler: (e: ApolloError) => void) => {
-    // Use LoadingModal transition
-    const onCompleted = async (data) => {
-      const {
-        login: { token, user },
-      } = data;
-      await AsyncStorage.setItem(AUTH_TOKEN_KEY, token);
-      await AsyncStorage.setItem(AUTH_USER_KEY, JSON.stringify({ user }));
-      await setCurrentUser(user);
-    };
+  const actions = React.useMemo(
+    () => ({
+      signUp: async (data: MutationLoginArgs, errorHandler) => {
+        // THIS SHOULD TAKE DATA and hit GQL
 
-    const onError = (e: ApolloError) => {
-      console.log(e);
-      errorHandler(e);
-    };
+        const token = 'dummy_token';
+        const user = {
+          firstName: 'Jim',
+          lastName: 'Bob',
+        };
 
-    await loginMutation({ variables: { email, password }, onCompleted, onError });
-  };
+        dispatch({ type: 'SIGN_UP', token, user });
+        await setToken(token);
+        await setUser(user);
+      },
+      login: async (loginData: MutationLoginArgs, errorHandler = (e) => {}) => {
+        // THIS SHOULD TAKE DATA and hit GQL
+        try {
+          const { data, errors } = await loginMutation({ variables: loginData });
 
-  const signout = async () => {
-    await AsyncStorage.multiRemove([AUTH_TOKEN_KEY, AUTH_USER_KEY]);
-    setCurrentUser(null);
-  };
+          if (errors) {
+            throw errors;
+          }
 
-  return (
-    <AuthContext.Provider value={{ currentUser, splashScreen, signout, login }}>
-      {children}
-    </AuthContext.Provider>
+          const {
+            login: { user, token },
+          } = data;
+
+          dispatch({ type: 'SIGN_UP', token, user });
+          await setToken(token);
+          await setUser(user);
+        } catch (e) {
+          console.error('LOGIN ERROR');
+          console.error(e);
+          errorHandler(e);
+        }
+      },
+      signOut: async () => {
+        // Clear all the things...
+        dispatch({ type: 'SIGN_OUT' });
+        await removeToken();
+        await removeUser();
+      },
+    }),
+    [state, dispatch]
   );
+
+  return <AuthContext.Provider value={{ ...state, ...actions }}>{children}</AuthContext.Provider>;
 };
-export const useAuth = () => useContext(AuthContext);

@@ -12,7 +12,6 @@ import {
   Center,
 } from 'native-base';
 import { useAuth } from '../contexts/Auth';
-import { ApolloError } from '@apollo/client';
 import { LoadingModal } from '../components/LoadingModal';
 
 export const LoginScreen = ({ navigation }) => {
@@ -23,16 +22,15 @@ export const LoginScreen = ({ navigation }) => {
   const { login } = useAuth();
 
   const handleLoginError = (e) => {
-    setLoading(false);
     // TODO: Realworld -- use React Hook Form and Parse GQL Errors
+    setLoading(false);
     console.error('BOOM', e);
-    setErrors(true);
+    setErrors(e);
   };
 
   const handleSubmit = async () => {
     setLoading(true);
-    await login(email, password, handleLoginError);
-    setLoading(false);
+    await login({ email, password }, handleLoginError);
   };
 
   return (
@@ -78,13 +76,7 @@ export const LoginScreen = ({ navigation }) => {
             placeholder="redH0tSecretSauce"
           />
         </FormControl>
-        <Button
-          mt="2"
-          colorScheme="green"
-          onPress={handleSubmit}
-          // isLoading={loading}
-          // isLoadingText="Loading..."
-        >
+        <Button mt="2" colorScheme="green" onPress={handleSubmit}>
           Sign in
         </Button>
         {errors && (

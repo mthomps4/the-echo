@@ -1,11 +1,11 @@
 import React from 'react';
 import { Box, Button, Center, Text } from 'native-base';
-import { useFindUsersQueryQuery } from '../../types';
+import { useFindUsersQuery } from '../../types';
 import { useAuth } from '../contexts/Auth';
 
 export const HomeScreen = () => {
-  const { data, error, loading } = useFindUsersQueryQuery();
-  const { signout } = useAuth();
+  const { data, error, loading } = useFindUsersQuery();
+  const { signOut } = useAuth();
 
   if (loading) {
     return <Center>Loading...</Center>;
@@ -20,7 +20,7 @@ export const HomeScreen = () => {
   return (
     <Box>
       <Box>
-        <Button onPress={signout}>Logout</Button>
+        <Button onPress={signOut}>Logout</Button>
       </Box>
       <Center>
         <Box>
